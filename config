@@ -1,0 +1,98 @@
+#!/usr/bin/php -f 
+<?php
+
+    echo "\ec"; // Clear the console
+
+    $bRun = true;
+    $bChanged = false;
+
+    $sPath = $argv[1] ?? ".";
+    $sModulesFile = $sPath . "/_modules.php";
+
+    if(file_exists($sModulesFile))
+        require_once $sModulesFile;
+
+    $aModules = $aModules ?? [];
+
+    $aOpts = [
+          [ "s[h]ow options",  "h",  "showOpts" ]
+
+        , [ "[l]ist classes",  "l",  function(){ 
+            global $aModules;
+
+            echo "Modules:\n"
+                ,str_repeat("=", 80), "\n"
+            ;
+
+            foreach($aModules as $sClass => $sFile) {
+                echo "\t$sClass => $sFile\n";
+            }
+
+            echo str_repeat("-", 80), "\n";
+
+          } ]
+
+        , [ "[a]dd class" , "a", function() {
+                global $aModules, $bChanged;
+
+                $sClass = readline("Class: "); 
+                if(empty($sClass = trim(ltrim($sClass, "\\")))) { echo "abort\n"; return; }
+
+                $sFile = readline("File: "); 
+                if(empty($sFile)) { echo "abort\n"; return; }
+
+                $aModules[$sClass] = $sFile;
+                $bChanged = true;
+          } ]
+
+        , [ "[d]rop class" , "d", function() {
+                global $aModules, $bChanged;
+
+                $sClass = readline("Class: "); 
+                if(empty($sClass = trim($sClass))) { echo "abort\n"; return; }
+
+                unset($aModules[$sClass]);
+                $bChanged = true;
+          } ]
+
+        , [ "[q]uit",  "q",  function(){ global $bRun; $bRun = false; } ]
+    ];
+
+    function showOpts() {
+        global $aOpts;
+        foreach($aOpts as $i => $aOpt) 
+            echo $i, ": ", $aOpt[0], "\n";
+    }
+
+    function saveModules() {
+        global $sModulesFile, $aModules, $bChanged; 
+        if($bChanged)
+            file_put_contents($sModulesFile, "<?php\n\t\$aModules = ".var_export($aModules, true).";");
+    }
+
+//==============================================================================
+// Main - Loop
+//==============================================================================
+    showOpts(); 
+    while($bRun) {
+        $line = trim(readline("What todo?: "));
+        echo "\n";
+        if(!$line) showOpts();
+        else {
+            $ran = false;
+            foreach($aOpts as $i => $aOpt) {
+                if(is_numeric($line) && $i === (int)$line or ($line === $aOpt[1])) {
+                    $fnc = $aOpt[2];
+                    $ran = true;
+                    $fnc();              
+                    break;
+                }
+            }
+
+            if(!$ran) echo "I Could not understand you !\n";
+
+            $line = false;
+        }
+    }
+
+    saveModules();
