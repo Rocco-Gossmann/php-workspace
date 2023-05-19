@@ -15,21 +15,12 @@ class Setup {
 //==============================================================================
 // Creator Functions
 //==============================================================================
-    public static function load($sRootPath) {
-
-    }
-
-    public static function recompile($sRootPath) {
-
-    }
-
     public static function create($sRootPath) {
         if(!is_dir($sPath = rtrim($sRootPath, "\\/"))) throw new SetupException("$sPath is not a Directory", SetupException::LIB_NOT_A_DIRECTORY); 
         $oI = new static();
         $oI->sRootPath = $sPath;
         return $oI; 
     }
-
 
 //==============================================================================
 // Builder functions
