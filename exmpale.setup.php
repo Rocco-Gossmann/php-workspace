@@ -1,10 +1,10 @@
 <?php
     require_once __DIR__ . "/Setup.php";
 
-    use \de\roccogossmann\php\workspace\Setup;
+    use \de\rogoss\php\workspace\Setup;
 
     echo Setup::create(".")
-        ->addLib("lib/de/roccogossmann/php/core")
+        ->addLib("lib/de/rogoss/php/core")
         ->compile("init.php")
 
         ? "success"
