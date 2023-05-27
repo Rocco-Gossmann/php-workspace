@@ -1,4 +1,4 @@
-<?php namespace de\rogoss\php\workspace;
+<?php namespace rogoss\workspace;
 
 class SetupException extends \Exception {
     const LIB_NOT_A_DIRECTORY = 1;
