@@ -4,7 +4,7 @@
     use rogoss\workspace\Setup;
 
     echo Setup::create(".")
-        ->addLib("lib/de/rogoss/php/core")
+        ->addLib("lib/rogoss/core")
         ->compile("init.php")
 
         ? "success"
