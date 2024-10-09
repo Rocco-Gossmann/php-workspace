@@ -27,6 +27,7 @@ class Setup {
 //==============================================================================
     public function addLib($sPath) {
         $sPath = trim($sPath, "\\/");
+
         if(!is_dir( $this->sRootPath . "/" . $sPath)) throw new SetupException("$sPath is not a Directory", SetupException::LIB_NOT_A_DIRECTORY); 
         $sFile = $this->sRootPath . "/" . $sPath . "/_modules.php";
 
@@ -34,7 +35,7 @@ class Setup {
         
         include $sFile;
         $aModules = $aModules ?? [];
-        if(!is_array($aModules)) throw new SetupException("$sPath/_modules.php has an invalid format. Use `./lib/de/rg/php/config $sPath` to set it up", SetupException::LIB_MODULES_READ_ERROR);
+        if(!is_array($aModules)) throw new SetupException("$sPath/_modules.php has an invalid format. Use `./config $sPath` script to set it up", SetupException::LIB_MODULES_READ_ERROR);
 
         foreach($aModules as $sClass => $sFile) {
             $sFile = $sPath . "/" . $sFile;
@@ -49,6 +50,14 @@ class Setup {
 //==============================================================================
     
     function compile($sOutFileName="autoload.php") {
+
+        //TODO: Process Subfolders
+        $sPathPrefix = str_repeat("../", count(explode("/", ltrim($sOutFileName, "./")))-1);
+
+        $aLocalizedModules = [];
+        foreach($this->aModules as $sClass => $sFile)
+            $aLocalizedModules[$sClass] = $sPathPrefix . $sFile;
+
         $sOutFile = $this->sRootPath . "/" . trim($sOutFileName, "\\/");
 
         if(file_exists($sOutFile)) 
@@ -58,7 +67,7 @@ class Setup {
         fwrite($hF, "<?php\n");
         
         fwrite($hF, "\$__autoload_classes=");
-        fwrite($hF, var_export($this->aModules, true));
+        fwrite($hF, var_export($aLocalizedModules, true));
         fwrite($hF, ";\n\n");
 
         fwrite($hF, <<<PHP
