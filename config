@@ -14,6 +14,8 @@ if (file_exists($sModulesFile))
 
 $aModules = $aModules ?? [];
 
+$sCurrentNameSpace = "";
+
 $aOpts = [
     ["s[h]ow options",  "h",  "showOpts"],
 
@@ -73,13 +75,6 @@ function showOpts()
         echo $i, ": ", $aOpt[0], "\n";
 }
 
-function saveModules()
-{
-    global $sModulesFile, $aModules, $bChanged;
-    if ($bChanged)
-        file_put_contents($sModulesFile, "<?php\n\t\$aModules = " . var_export($aModules, true) . ";");
-}
-
 //==============================================================================
 // Main - Loop
 //==============================================================================
@@ -105,4 +100,6 @@ while ($bRun) {
     }
 }
 
-saveModules();
+// Save Changes if needed
+if ($bChanged)
+    file_put_contents($sModulesFile, "<?php\n\n\$aModules = " . var_export($aModules, true) . ";");
