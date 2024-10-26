@@ -16,6 +16,21 @@ $aModules = $aModules ?? [];
 
 $sCurrentNameSpace = "";
 
+/** @return array - [ 
+ *      'namespace' => `namespace of the class`, 
+ *      'classname' => `basename of the class`
+ * ]
+ */
+function splitClassNamespace($sClass) {
+        $arr = [];
+        preg_match('/(?<namespace>.*?)\\\\{0,1}(?<classname>[^\\\\]+)$/', $sClass, $arr);
+
+        return [
+            'classname' => $arr['classname'],
+            'namespace' => $arr['namespace']
+        ];
+}
+
 $aOpts = [
     ["s[h]ow options",  "h",  "showOpts"],
 
@@ -47,12 +62,10 @@ $aOpts = [
             return;
         }
 
-        $arr = [];
-        preg_match('/(?<namespace>.*?)\\\\{0,1}(?<classname>[^\\\\]+)$/', $sClass, $arr);
+        $arr = splitClassNamespace($sClass);
         $sDefaultFileName = "./" . $arr['classname'] . ".php";
-        $sClassNameSpace = $arr['namespace'];
 
-        if(strcmp($sClassNameSpace, $sCurrentNameSpace)) 
+        if(strcmp($arr['namespace'], $sCurrentNameSpace)) 
             $sClass = $sCurrentNameSpace . "\\" . $sClass;
 
         $sFile = readline("File [$sDefaultFileName]: ");
@@ -67,13 +80,17 @@ $aOpts = [
     }],
 
     ["[d]rop class", "d", function () {
-        global $aModules, $bChanged;
+        global $aModules, $bChanged, $sCurrentNameSpace;
 
         $sClass = readline("Class: ");
         if (empty($sClass = trim($sClass))) {
             echo "abort\n";
             return;
         }
+
+        $arr = splitClassNamespace($sClass);
+        if(strcmp($arr['namespace'], $sCurrentNameSpace)) 
+            $sClass = $sCurrentNameSpace . "\\" . $sClass;
 
         unset($aModules[$sClass]);
         $bChanged = true;
