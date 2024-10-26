@@ -19,6 +19,14 @@ $sCurrentNameSpace = "";
 $aOpts = [
     ["s[h]ow options",  "h",  "showOpts"],
 
+
+    ["set [n]amespace",  "n",  function() {
+        global $sCurrentNameSpace;
+        $sNS = readline("namespace: ");
+        $sCurrentNameSpace = ltrim($sNS, "\\");
+        echo "\ec"; // Clear the console
+    }],
+
     ["[l]ist classes",  "l",  function () {
         global $aModules;
 
@@ -31,7 +39,7 @@ $aOpts = [
         echo str_repeat("-", 80), "\n";
     }],
     ["[a]dd class", "a", function () {
-        global $aModules, $bChanged;
+        global $aModules, $bChanged, $sCurrentNameSpace;
 
         $sClass = readline("Class: ");
         if (empty($sClass = trim(ltrim($sClass, "\\")))) {
@@ -40,8 +48,12 @@ $aOpts = [
         }
 
         $arr = [];
-        preg_match('/(?<classname>[^\\\\]*)$/', $sClass, $arr);
+        preg_match('/(?<namespace>.*?)\\\\{0,1}(?<classname>[^\\\\]+)$/', $sClass, $arr);
         $sDefaultFileName = "./" . $arr['classname'] . ".php";
+        $sClassNameSpace = $arr['namespace'];
+
+        if(strcmp($sClassNameSpace, $sCurrentNameSpace)) 
+            $sClass = $sCurrentNameSpace . "\\" . $sClass;
 
         $sFile = readline("File [$sDefaultFileName]: ");
         if (empty($sFile))
@@ -49,7 +61,11 @@ $aOpts = [
 
         $aModules[$sClass] = $sFile;
         $bChanged = true;
+
+        echo "\ec", "added $sClass => $sFile\n";
+
     }],
+
     ["[d]rop class", "d", function () {
         global $aModules, $bChanged;
 
@@ -61,6 +77,7 @@ $aOpts = [
 
         unset($aModules[$sClass]);
         $bChanged = true;
+        echo "\ec"; // Clear the console
     }],
     ["[q]uit",  "q",  function () {
         global $bRun;
@@ -71,6 +88,7 @@ $aOpts = [
 function showOpts()
 {
     global $aOpts;
+    echo "\ec"; // Clear the console
     foreach ($aOpts as $i => $aOpt)
         echo $i, ": ", $aOpt[0], "\n";
 }
@@ -80,7 +98,8 @@ function showOpts()
 //==============================================================================
 showOpts();
 while ($bRun) {
-    $line = trim(readline("What todo?: "));
+    echo "\nCurrent namespace: ", $sCurrentNameSpace, "\n";
+    $line = trim(readline("What todo [h]: "));
     echo "\n";
     if (!$line) showOpts();
     else {
